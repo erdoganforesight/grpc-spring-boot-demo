@@ -1,0 +1,23 @@
+service: grpc-lambda-client
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: java11
+  timeout: 30
+
+package:
+  artifact: target/grpc-lambda-client.jar
+
+functions:
+  runner:
+    handler: demo.Handler
+    environment:
+      GRPC_SERVER_ADDRESS: "dns:///127.0.0.1:9099"
+      EXECUTOR_THREAD_POOL_SIZE: "10"
+      REQUEST_COUNT: "1000"
+      REQUEST_SLEEP_TIME: "5"
+    events:
+      - httpApi:
+          path: /
+          method: get
