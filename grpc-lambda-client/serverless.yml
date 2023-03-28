@@ -4,20 +4,51 @@ frameworkVersion: '2'
 provider:
   name: aws
   runtime: java11
-  timeout: 30
+  environment:
+    QUEUE_NAME: TriggerQueue
+    SQS_URL:
+      Ref: MyQueue
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sqs:SendMessage
+        - sqs:SendMessageBatch
+        - sqs:ChangeMessageVisibility
+        - sqs:DeleteMessage
+        - sqs:GetQueueAttributes
+        - sqs:ReceiveMessage
+      Resource:
+        Fn::GetAtt:
+          - MyQueue
+          - Arn
 
 package:
   artifact: target/grpc-lambda-client.jar
 
 functions:
-  runner:
-    handler: demo.Handler
+  starter:
+    handler: demo.Starter
+    reservedConcurrency: 1
+    timeout: 30
+  sender:
+    handler: demo.Sender
+    reservedConcurrency: 100
+    timeout: 30
     environment:
-      GRPC_SERVER_ADDRESS: "dns:///127.0.0.1:9099"
-      EXECUTOR_THREAD_POOL_SIZE: "10"
+      GRPC_SERVER_ADDRESS: "dns:///service.erdoganyesil.link:9095"
       REQUEST_COUNT: "1000"
-      REQUEST_SLEEP_TIME: "5"
     events:
-      - httpApi:
-          path: /
-          method: get
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - MyQueue
+              - Arn
+          batchSize: 1
+
+resources:
+  Resources:
+    MyQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:provider.environment.QUEUE_NAME}
+        VisibilityTimeout: 60
