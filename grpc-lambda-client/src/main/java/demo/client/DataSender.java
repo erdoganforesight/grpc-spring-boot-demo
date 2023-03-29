@@ -29,6 +29,7 @@ public class DataSender  {
                 .keepAliveTime(1, TimeUnit.MINUTES)
                 .executor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2))
                 .offloadExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2))
+                //.usePlaintext()
                 .build();
         this.client = TraceServiceGrpc.newFutureStub(this.channel);
     }
@@ -40,7 +41,7 @@ public class DataSender  {
                 FUTURE_QUEUE.add(client.export(createExportTraceServiceRequest()));
             }
             checkFutures();
-            System.out.println("TotalDuration:" + (System.currentTimeMillis() - start));
+            System.out.println("TotalDurationNoClose:" + (System.currentTimeMillis() - start));
         } catch (Exception ex) {
             ex.printStackTrace();
         }

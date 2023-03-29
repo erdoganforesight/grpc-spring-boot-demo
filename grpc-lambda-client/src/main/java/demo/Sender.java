@@ -25,7 +25,6 @@ public class Sender implements RequestHandler<SQSEvent, Void> {
 	@Override
 	public Void handleRequest(SQSEvent event, Context context) {
 		sender.export();
-		sender.close();
 		return null;
 	}
 }
