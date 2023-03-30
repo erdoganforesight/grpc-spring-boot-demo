@@ -38,7 +38,8 @@ functions:
     timeout: 30
     environment:
       GRPC_SERVER_ADDRESS: "dns:///54.71.125.171:9099"
-      REQUEST_COUNT: "1000"
+      PARALLELIZATION_COUNT: "1"
+      EXECUTION_DURATION: "300000"
     events:
       - sqs:
           arn:
