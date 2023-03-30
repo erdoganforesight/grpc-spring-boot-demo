@@ -15,7 +15,10 @@ import static demo.client.RequestUtil.createExportTraceServiceRequest;
 
 
 public class DataSender  {
+    private final ExecutorService executor;
+    private final ExecutorService offloadExecutor;
     private ConcurrentLinkedQueue<Future> FUTURE_QUEUE = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<Exception> EXCEPTION_QUEUE = new ConcurrentLinkedQueue<>();
     private TraceServiceGrpc.TraceServiceFutureStub client;
     private ManagedChannel channel;
     private String grpcServerAddress;
@@ -24,12 +27,14 @@ public class DataSender  {
     public DataSender(String grpcServerAddress, int requestCount) {
         this.grpcServerAddress = grpcServerAddress;
         this.requestCount = requestCount;
+        executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+        offloadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);;
         this.channel = ManagedChannelBuilder
                 .forTarget(grpcServerAddress)
                 .keepAliveTime(1, TimeUnit.MINUTES)
                 .executor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2))
                 .offloadExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2))
-                //.usePlaintext()
+                .usePlaintext()
                 .build();
         this.client = TraceServiceGrpc.newFutureStub(this.channel);
     }
@@ -41,7 +46,12 @@ public class DataSender  {
                 FUTURE_QUEUE.add(client.export(createExportTraceServiceRequest()));
             }
             checkFutures();
-            System.out.println("TotalDurationNoClose:" + (System.currentTimeMillis() - start));
+            if (EXCEPTION_QUEUE.size() > 0){
+                System.out.println("TotalDurationError:" + (System.currentTimeMillis() - start) + " error count:"+ EXCEPTION_QUEUE.size());
+            } else {
+                System.out.println("TotalDuration:" + (System.currentTimeMillis() - start));
+            }
+            EXCEPTION_QUEUE.clear();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -58,11 +68,14 @@ public class DataSender  {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                EXCEPTION_QUEUE.add(e);
             }
         }
     }
 
     public void close() {
-        this.channel.shutdown();
+        this.executor.shutdownNow();
+        this.offloadExecutor.shutdownNow();
+        this.channel.shutdownNow();
     }
 }

@@ -30,12 +30,14 @@ functions:
     handler: demo.Starter
     reservedConcurrency: 1
     timeout: 30
+    environment:
+      MESSAGE_COUNT: "100"
   sender:
     handler: demo.Sender
-    reservedConcurrency: 100
+    reservedConcurrency: 10
     timeout: 30
     environment:
-      GRPC_SERVER_ADDRESS: "dns:///service.erdoganyesil.link:9095"
+      GRPC_SERVER_ADDRESS: "dns:///54.71.125.171:9099"
       REQUEST_COUNT: "1000"
     events:
       - sqs:
