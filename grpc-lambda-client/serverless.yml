@@ -40,13 +40,6 @@ functions:
       GRPC_SERVER_ADDRESS: "dns:///54.71.125.171:9099"
       PARALLELIZATION_COUNT: "1"
       EXECUTION_DURATION: "300000"
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - MyQueue
-              - Arn
-          batchSize: 1
 
 resources:
   Resources:
