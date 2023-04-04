@@ -28,7 +28,7 @@ public class DataSenderSync {
                     .keepAliveTime(1, TimeUnit.MINUTES)
                     .executor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2))
                     .offloadExecutor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2))
-                    //.usePlaintext()
+                    .usePlaintext()
                     .build());
         }
     }

@@ -1,14 +1,14 @@
 package demo;
 
-import demo.client.DataSender;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.events.SQSEvent;
 import demo.client.DataSenderSync;
 
+import java.util.Map;
 
-public class Sender implements RequestHandler<SQSEvent, Void> {
+
+public class Sender implements RequestHandler<Map, Void> {
 
 	public static final String PARALLELIZATION_COUNT = "1";
 
@@ -25,7 +25,7 @@ public class Sender implements RequestHandler<SQSEvent, Void> {
 	}
 
 	@Override
-	public Void handleRequest(SQSEvent event, Context context) {
+	public Void handleRequest(Map event, Context context) {
 		sender.export();
 		return null;
 	}
