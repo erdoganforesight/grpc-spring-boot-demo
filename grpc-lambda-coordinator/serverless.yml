@@ -1,0 +1,22 @@
+service: grpc-lambda-coordinator
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  environment:
+    LAMBDA_NAME: grpc-lambda-client-dev-sender
+    CALL_COUNT: 100
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - lambda:*
+      Resource: "*"
+package:
+  artifact: target/grpc-lambda-client.jar
+
+functions:
+  starter:
+    handler: index.handler
+    reservedConcurrency: 1
+    timeout: 60
